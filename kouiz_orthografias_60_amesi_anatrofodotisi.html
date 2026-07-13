@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="el">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Κουίζ Ορθογραφίας</title>
+<style>
+:root {
+  --primary:#4f46e5;
+  --primary2:#7c3aed;
+  --bg:#f4f6fb;
+  --card:#ffffff;
+  --text:#1f2937;
+  --muted:#64748b;
+  --border:#dbe3ef;
+  --ok:#15803d;
+  --bad:#b91c1c;
+}
+* { box-sizing:border-box; }
+body {
+  margin:0;
+  font-family:Arial, Helvetica, sans-serif;
+  background:linear-gradient(135deg,#eef2ff,#f8fafc);
+  color:var(--text);
+}
+.container {
+  width:min(1000px,94%);
+  margin:28px auto 60px;
+}
+header {
+  background:linear-gradient(135deg,var(--primary),var(--primary2));
+  color:white;
+  padding:28px;
+  border-radius:20px;
+  box-shadow:0 14px 35px rgba(79,70,229,.22);
+}
+header h1 { margin:0; }
+.quiz-list {
+  display:grid;
+  gap:18px;
+  margin-top:22px;
+}
+.question-card {
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:16px;
+  padding:22px;
+  box-shadow:0 8px 24px rgba(15,23,42,.07);
+}
+.question-title {
+  font-size:1.08rem;
+  line-height:1.5;
+  font-weight:700;
+  margin-bottom:14px;
+}
+.options {
+  display:grid;
+  gap:10px;
+}
+.option-label {
+  display:flex;
+  align-items:flex-start;
+  gap:10px;
+  padding:12px 14px;
+  border:1px solid var(--border);
+  border-radius:11px;
+  cursor:pointer;
+  line-height:1.45;
+  background:#fff;
+}
+.option-label:hover {
+  border-color:var(--primary);
+  background:#f8f7ff;
+}
+.option-label.correct {
+  border-color:#22c55e;
+  background:#ecfdf3;
+}
+.option-label.wrong {
+  border-color:#ef4444;
+  background:#fef2f2;
+}
+.feedback {
+  display:none;
+  margin-top:13px;
+  padding:12px 14px;
+  border-radius:10px;
+  line-height:1.45;
+}
+.feedback.ok {
+  display:block;
+  background:#ecfdf3;
+  color:var(--ok);
+  border:1px solid #bbf7d0;
+}
+.feedback.bad {
+  display:block;
+  background:#fef2f2;
+  color:var(--bad);
+  border:1px solid #fecaca;
+}
+.submit-wrap {
+  position:sticky;
+  bottom:12px;
+  margin-top:24px;
+  text-align:center;
+}
+.submit-btn {
+  border:none;
+  border-radius:12px;
+  padding:14px 24px;
+  font-size:1rem;
+  font-weight:700;
+  color:white;
+  background:linear-gradient(135deg,var(--primary),var(--primary2));
+  cursor:pointer;
+  box-shadow:0 8px 22px rgba(79,70,229,.25);
+}
+.result {
+  display:none;
+  margin-top:22px;
+  background:white;
+  padding:24px;
+  border-radius:16px;
+  text-align:center;
+  box-shadow:0 8px 24px rgba(15,23,42,.08);
+}
+.score {
+  font-size:2.4rem;
+  font-weight:800;
+  color:var(--primary);
+}
+@media(max-width:600px) {
+  .question-card { padding:17px; }
+}
+</style>
+</head>
+<body>
+<div class="container">
+  <header><h1>Κουίζ Ορθογραφίας</h1></header>
+  <div class="quiz-list" id="quizList"></div>
+  <div class="submit-wrap">
+    <button class="submit-btn" id="submitBtn">Υποβολή απαντήσεων</button>
+  </div>
+  <section class="result" id="result">
+    <h2>Αποτελέσματα</h2>
+    <div class="score" id="score"></div>
+  </section>
+</div>
+
+<script>
+const questions = [{"id": 1, "q": "Ποια λέξη είναι γραμμένη σωστά;", "options": ["αισθανόμαστε", "αισθανόμασται", "αισθανώμαστε", "εσθανόμαστε"], "answer": 0, "feedback": "Ο σωστός τύπος είναι «αισθανόμαστε»."}, {"id": 2, "q": "Ποια είναι η σωστή ορθογραφία της λέξης;", "options": ["ευριματικός", "ευρηματικός", "εβρηματικός", "ευριματηκός"], "answer": 1, "feedback": "Η λέξη γράφεται «ευρηματικός»."}, {"id": 3, "q": "Ποια λέξη συμπληρώνει σωστά την πρόταση; «Έφυγε πολύ ________ από το σπίτι.»", "options": ["γρήγωρα", "γρίγωρα", "γρήγορα", "γρίγορα"], "answer": 2, "feedback": "Το επίρρημα γράφεται «γρήγορα»."}, {"id": 4, "q": "Ποια μορφή είναι ορθογραφικά σωστή;", "options": ["φησικός", "φυσηκός", "φυσικώς", "φυσικός"], "answer": 3, "feedback": "Το επίθετο γράφεται «φυσικός»."}, {"id": 5, "q": "Ποια λέξη είναι γραμμένη σωστά;", "options": ["άκαμπτος", "άκαμτος", "άκαμπτως", "άκαμπτως"], "answer": 0, "feedback": "Ο σωστός τύπος είναι «άκαμπτος»."}, {"id": 6, "q": "Ποια λέξη συμπληρώνει σωστά την πρόταση; «Χρειάζεται χρόνο για να ________ στις νέες συνθήκες.»", "options": ["προσαρμοστεί", "προσαρμωστεί", "προσαρμοστή", "προσαρμοστί"], "answer": 0, "feedback": "Ο σωστός τύπος είναι «προσαρμοστεί»."}, {"id": 7, "q": "Ποια μορφή είναι σωστή; «Θα περιμένουμε μέχρι να ________ το κατάστημα.»", "options": ["ανήξει", "ανοίξη", "ανοίξει", "ανοίξι"], "answer": 2, "feedback": "Ο σωστός τύπος είναι «ανοίξει»."}, {"id": 8, "q": "Ποια λέξη είναι γραμμένη σωστά;", "options": ["καθημερινοτητα", "καθιμερινότητα", "καθημερηνότητα", "καθημερινότητα"], "answer": 3, "feedback": "Η σωστή γραφή είναι «καθημερινότητα»."}, {"id": 9, "q": "Ποια φράση είναι ορθογραφικά σωστή;", "options": ["ισπανική ομάδα", "ισπανική ομμάδα", "ισπανηκή ομάδα", "ισπανεική ομάδα"], "answer": 0, "feedback": "Η σωστή γραφή είναι «ισπανική ομάδα»."}, {"id": 10, "q": "Ποιος τύπος είναι σωστός; «Η ομάδα ________ συχνά.»", "options": ["κερδίζει", "κερδήζει", "κερδίζη", "κερδίζι"], "answer": 0, "feedback": "Ο σωστός τύπος είναι «κερδίζει»."}, {"id": 11, "q": "Ποια φράση είναι γραμμένη σωστά;", "options": ["ο εξωστρεφείς", "ο εξωστρεφίς", "ο εξωστρεφής", "ο εξωστρεφήςς"], "answer": 2, "feedback": "Στον ενικό γράφεται «ο εξωστρεφής»."}, {"id": 12, "q": "Ποια λέξη είναι γραμμένη σωστά;", "options": ["ικανωτητά", "ικανότητα", "ικανώτητα", "ικανότιτα"], "answer": 1, "feedback": "Η σωστή γραφή είναι «ικανότητα»."}, {"id": 13, "q": "Ποια λέξη είναι ορθογραφικά σωστή;", "options": ["μουσηκή", "μουσικί", "μουζηκή", "μουσική"], "answer": 3, "feedback": "Η λέξη γράφεται «μουσική»."}, {"id": 14, "q": "Ποια μορφή συμπληρώνει σωστά την πρόταση; «Η συμπεριφορά του ________ αντιδράσεις.»", "options": ["προκαλήει", "προκαλλεί", "προκαλεί", "προκαλή"], "answer": 2, "feedback": "Ο σωστός τύπος είναι «προκαλεί»."}, {"id": 15, "q": "Ποια λέξη είναι γραμμένη σωστά;", "options": ["στιγκμή", "στιγμή", "στηγμή", "στιγμοί"], "answer": 1, "feedback": "Η σωστή γραφή είναι «στιγμή»."}, {"id": 16, "q": "Ποια λέξη είναι ορθογραφικά σωστή;", "options": ["εκδιλωτικός", "εκδηλωτικός", "εκδιλοτικός", "εκδηλοτικός"], "answer": 1, "feedback": "Η λέξη γράφεται «εκδηλωτικός»."}, {"id": 17, "q": "Ποιος τύπος είναι σωστός; «Χθες ________ πολύ κουρασμένος.»", "options": ["ήταν", "ίταν", "ήταναι", "ήτανν"], "answer": 0, "feedback": "Ο σωστός τύπος είναι «ήταν»."}, {"id": 18, "q": "Ποια λέξη είναι γραμμένη σωστά;", "options": ["ανέσθητος", "αναίσθιτος", "αναισθητός", "αναίσθητος"], "answer": 3, "feedback": "Η σωστή γραφή είναι «αναίσθητος»."}, {"id": 19, "q": "Ποια λέξη είναι ορθογραφικά σωστή;", "options": ["γωνιώς", "γωνιός", "γονιώς", "γονιός"], "answer": 3, "feedback": "Η λέξη γράφεται «γονιός»."}, {"id": 20, "q": "Ποια λέξη είναι γραμμένη σωστά;", "options": ["ζεβγάρι", "ζευγάρη", "ζευγάρι", "ζευγγάρι"], "answer": 2, "feedback": "Η σωστή γραφή είναι «ζευγάρι»."}, {"id": 21, "q": "Ποια λέξη είναι γραμμένη σωστά;", "options": ["θλήψη", "θλίψει", "θλίπση", "θλίψη"], "answer": 3, "feedback": "Η σωστή γραφή είναι «θλίψη»."}, {"id": 22, "q": "Ποια λέξη είναι ορθογραφικά σωστή;", "options": ["οικογέννεια", "οικωγένεια", "οικογένια", "οικογένεια"], "answer": 3, "feedback": "Η λέξη γράφεται «οικογένεια»."}, {"id": 23, "q": "Ποια μορφή συμπληρώνει σωστά την πρόταση; «Η προσωπικότητα του παιδιού ________ σταδιακά.»", "options": ["διαμορφώνεται", "διαμορφόνεται", "διαμορφώνεταιι", "διαμορφώνετε"], "answer": 0, "feedback": "Ο σωστός παθητικός τύπος είναι «διαμορφώνεται»."}, {"id": 24, "q": "Ποια λέξη είναι γραμμένη σωστά;", "options": ["προσωπηκότητα", "προσωπικότιτα", "προσοπικότητα", "προσωπικότητα"], "answer": 3, "feedback": "Η σωστή γραφή είναι «προσωπικότητα»."}, {"id": 25, "q": "Ποια λέξη είναι ορθογραφικά σωστή;", "options": ["γυνέκα", "γινέκα", "γυναίκα", "γυνέικα"], "answer": 2, "feedback": "Η λέξη γράφεται «γυναίκα»."}, {"id": 26, "q": "Ποιος τύπος συμπληρώνει σωστά την πρόταση; «Η δουλειά του ________ για την ποιότητά της.»", "options": ["ξεχωρίζει", "ξεχορίζει", "ξεχωρίζη", "ξεχωρήζει"], "answer": 0, "feedback": "Ο σωστός τύπος είναι «ξεχωρίζει»."}, {"id": 27, "q": "Ποια λέξη είναι γραμμένη σωστά;", "options": ["απετήσεις", "απαιτήσεις", "απαιτήσης", "απαιτίσεις"], "answer": 1, "feedback": "Η σωστή γραφή είναι «απαιτήσεις»."}, {"id": 28, "q": "Ποια μορφή είναι κατάλληλη στον τυπικό γραπτό λόγο; «Η κατάσταση ________ συνεχώς.»", "options": ["εξελισσόταν", "εξελισώταν", "εξελισσώταν", "εξελισόταν"], "answer": 0, "feedback": "Στον τυπικό γραπτό λόγο ο σωστός τύπος είναι «εξελισσόταν»."}, {"id": 29, "q": "Ποιος τύπος είναι ορθογραφικά σωστός; «Η εργασία ________ μεγάλη προσοχή.»", "options": ["απαιτεί", "απαιτήει", "απετεί", "απαιτή"], "answer": 0, "feedback": "Ο σωστός τύπος είναι «απαιτεί»."}, {"id": 30, "q": "Ποια λέξη είναι γραμμένη σωστά;", "options": ["δίαβασμα", "διάβασμμα", "διάβασμα", "διαβάσμα"], "answer": 2, "feedback": "Η σωστή γραφή είναι «διάβασμα»."}, {"id": 31, "q": "Ποια μορφή συμπληρώνει σωστά την πρόταση; «Οι ________ μέρες ήταν οι πιο δύσκολες.»", "options": ["πρώταις", "πρώτες", "πρόταις", "πρότες"], "answer": 1, "feedback": "Η σωστή γραφή είναι «πρώτες»."}, {"id": 32, "q": "Ποιος τύπος είναι γραμμένος σωστά; «Οι αλλαγές μάς ________ αρκετά.»", "options": ["δυσκόλεπσαν", "δυσκόλεψανε", "δυσκόλεψαν", "δυσκόλευσαν"], "answer": 2, "feedback": "Ο σωστός τύπος είναι «δυσκόλεψαν»."}, {"id": 33, "q": "Ποια λέξη είναι ορθογραφικά σωστή;", "options": ["εξάμηνο", "εξάμηνω", "εξάμμηνο", "εξάμινο"], "answer": 0, "feedback": "Η λέξη γράφεται «εξάμηνο»."}, {"id": 34, "q": "Ποιος τύπος συμπληρώνει σωστά την πρόταση; «Τελικά ________ τη λύση.»", "options": ["βρήκκα", "βρήκα", "βρίκα", "βρείκα"], "answer": 1, "feedback": "Ο σωστός τύπος είναι «βρήκα»."}, {"id": 35, "q": "Ποια λέξη είναι γραμμένη σωστά;", "options": ["ρυθμμμό", "ριθμό", "ρυθμό", "ρυθμώ"], "answer": 2, "feedback": "Η σωστή γραφή είναι «ρυθμό»."}, {"id": 36, "q": "Ποια λέξη είναι ορθογραφικά σωστή;", "options": ["διαμόρφωσει", "διαμόρφωση", "διαμόρφοση", "διαμόρφωσι"], "answer": 1, "feedback": "Η σωστή γραφή είναι «διαμόρφωση»."}, {"id": 37, "q": "Ποια μορφή συμπληρώνει σωστά την πρόταση; «Χρειάζομαι ________ στοιχεία.»", "options": ["περισσότερα", "περισσότερρα", "περισσώτερα", "περισότερα"], "answer": 0, "feedback": "Η σωστή γραφή είναι «περισσότερα»."}, {"id": 38, "q": "Ποια λέξη είναι γραμμένη σωστά;", "options": ["μεγαλύτερως", "μεγαλήτερος", "μεγαλύτερρος", "μεγαλύτερος"], "answer": 3, "feedback": "Η σωστή γραφή είναι «μεγαλύτερος»."}, {"id": 39, "q": "Ποια μορφή είναι ορθογραφικά σωστή;", "options": ["μακρύτερρος", "μακρύτερος", "μακρίτερος", "μακρύτερως"], "answer": 1, "feedback": "Η σωστή γραφή είναι «μακρύτερος»."}, {"id": 40, "q": "Ποια λέξη είναι γραμμένη σωστά;", "options": ["ασφάλεια", "ασφάληα", "ασφάλια", "ασφάλλεια"], "answer": 0, "feedback": "Η σωστή γραφή είναι «ασφάλεια»."}, {"id": 41, "q": "Ποια λέξη είναι γραμμένη σωστά;", "options": ["γέλιαα", "γέληα", "γέλιας", "γέλια"], "answer": 3, "feedback": "Η σωστή γραφή είναι «γέλια»."}, {"id": 42, "q": "Ποια λέξη είναι ορθογραφικά σωστή;", "options": ["βαμβάκιι", "βαμβάκυ", "βαμβάκη", "βαμβάκι"], "answer": 3, "feedback": "Η σωστή γραφή είναι «βαμβάκι»."}, {"id": 43, "q": "Ποιος τύπος είναι σωστός; «Η εικόνα ________ την πραγματικότητα.»", "options": ["δίχνει", "δείχνει", "δείχνη", "δείχνι"], "answer": 1, "feedback": "Ο σωστός τύπος είναι «δείχνει»."}, {"id": 44, "q": "Ποια λέξη είναι γραμμένη σωστά;", "options": ["προσωπηκά", "προσοπικά", "προσωπικα", "προσωπικά"], "answer": 3, "feedback": "Η σωστή γραφή είναι «προσωπικά»."}, {"id": 45, "q": "Ποια λέξη είναι ορθογραφικά σωστή;", "options": ["ολόσομο", "ολώσωμο", "ολόσωμο", "ολόσωμμο"], "answer": 2, "feedback": "Η σωστή γραφή είναι «ολόσωμο»."}, {"id": 46, "q": "Ποια μορφή είναι σωστή;", "options": ["επειδή", "επείδη", "επιδει", "επιδή"], "answer": 0, "feedback": "Ο σωστός σύνδεσμος είναι «επειδή»."}, {"id": 47, "q": "Ποια λέξη είναι γραμμένη σωστά;", "options": ["δικέωμα", "δικαίωμα", "δικαίομα", "δικέομα"], "answer": 1, "feedback": "Η σωστή γραφή είναι «δικαίωμα»."}, {"id": 48, "q": "Ποια λέξη είναι ορθογραφικά σωστή;", "options": ["δημοφιλλές", "δημοφιλές", "δημοφυλές", "δημοφηλές"], "answer": 1, "feedback": "Η σωστή γραφή είναι «δημοφιλές»."}, {"id": 49, "q": "Ποια λέξη είναι γραμμένη σωστά;", "options": ["εγκληματίας", "εγκλιματίας", "ενκληματίας", "εγκληματίαςς"], "answer": 0, "feedback": "Η σωστή γραφή είναι «εγκληματίας»."}, {"id": 50, "q": "Ποιος τύπος είναι σωστός; «Το κτίριο ________ μέσα σε δύο χρόνια.»", "options": ["φτιάχτηκε", "φτιάχτικε", "φτιάχτηκαι", "φτιάχτηκκε"], "answer": 0, "feedback": "Ο σωστός τύπος είναι «φτιάχτηκε»."}, {"id": 51, "q": "Ποια λέξη είναι ορθογραφικά σωστή;", "options": ["εντυποσιακό", "εντιπωσιακό", "εντυπωσιακό", "εντιποσιακό"], "answer": 2, "feedback": "Η σωστή γραφή είναι «εντυπωσιακό»."}, {"id": 52, "q": "Ποια λέξη είναι γραμμένη σωστά;", "options": ["μαύρει", "μαύρι", "μαβρη", "μαύρη"], "answer": 3, "feedback": "Η σωστή γραφή είναι «μαύρη»."}, {"id": 53, "q": "Ποιος τύπος είναι σωστός;", "options": ["επιθημούσα", "επιθυμούσσα", "επιθυμούσα", "επιθυμούζα"], "answer": 2, "feedback": "Η σωστή γραφή είναι «επιθυμούσα»."}, {"id": 54, "q": "Ποιος τύπος είναι ορθογραφικά σωστός;", "options": ["αγκαλιάζει", "αγκαλιάζειι", "αγκαλιάζειη", "αγκαλιάζη"], "answer": 0, "feedback": "Ο σωστός τύπος είναι «αγκαλιάζει»."}, {"id": 55, "q": "Ποια λέξη είναι γραμμένη σωστά;", "options": ["όλουςυ", "όλους", "όλλους", "όλουςς"], "answer": 1, "feedback": "Η σωστή γραφή είναι «όλους»."}, {"id": 56, "q": "Ποια μορφή είναι σωστή;", "options": ["ανοιχτά", "ανοικτά", "ανιχτά", "ανυχτά"], "answer": 0, "feedback": "Η σωστή γραφή είναι «ανοιχτά»."}, {"id": 57, "q": "Εντόπισε τη σωστά γραμμένη λέξη.", "options": ["ασφάλειαα", "ασφάλειας", "ασφάλεια", "ασφαλία"], "answer": 2, "feedback": "Η σωστή γραφή είναι «ασφάλεια»."}, {"id": 58, "q": "Ποια λέξη είναι σωστή;", "options": ["περισώτερα", "περισσότερα", "περισότερα", "περισσώτερα"], "answer": 1, "feedback": "Η σωστή γραφή είναι «περισσότερα»."}, {"id": 59, "q": "Ποια λέξη είναι σωστή;", "options": ["μακρύτερρος", "μακρύτερος", "μακρίτερος", "μακρύτερως"], "answer": 1, "feedback": "Η σωστή γραφή είναι «μακρύτερος»."}, {"id": 60, "q": "Ποια λέξη είναι σωστή;", "options": ["μεγαλήτερος", "μεγαλήτερως", "μεγαλύτερος", "μεγαλύτερρος"], "answer": 2, "feedback": "Η σωστή γραφή είναι «μεγαλύτερος»."}];
+const greekLetters = ['Α','Β','Γ','Δ'];
+const quizList = document.getElementById('quizList');
+const answered = Array(questions.length).fill(null);
+
+questions.forEach((q, qi) => {
+  const card = document.createElement('section');
+  card.className = 'question-card';
+  card.innerHTML = `
+    <div class="question-title">${qi + 1}. ${q.q}</div>
+    <div class="options" id="options-${qi}"></div>
+    <div class="feedback" id="feedback-${qi}"></div>
+  `;
+  quizList.appendChild(card);
+
+  const optionsBox = document.getElementById(`options-${qi}`);
+  q.options.forEach((opt, oi) => {
+    const label = document.createElement('label');
+    label.className = 'option-label';
+    label.innerHTML = `
+      <input type="radio" name="q${qi}" value="${oi}">
+      <span><strong>${greekLetters[oi]}.</strong> ${opt}</span>
+    `;
+    optionsBox.appendChild(label);
+
+    const input = label.querySelector('input');
+    input.addEventListener('change', () => showImmediateFeedback(qi, oi));
+  });
+});
+
+function showImmediateFeedback(qi, selectedIndex) {
+  if (answered[qi] !== null) return;
+  answered[qi] = selectedIndex;
+
+  const q = questions[qi];
+  const labels = [...document.querySelectorAll(`#options-${qi} .option-label`)];
+  const inputs = [...document.querySelectorAll(`input[name="q${qi}"]`)];
+  const feedback = document.getElementById(`feedback-${qi}`);
+
+  inputs.forEach(input => input.disabled = true);
+  labels[q.answer].classList.add('correct');
+
+  if (selectedIndex === q.answer) {
+    feedback.className = 'feedback ok';
+    feedback.innerHTML = `<strong>Σωστά.</strong> ${q.feedback}`;
+  } else {
+    labels[selectedIndex].classList.add('wrong');
+    feedback.className = 'feedback bad';
+    feedback.innerHTML = `<strong>Λάθος.</strong> Η σωστή απάντηση είναι <strong>${greekLetters[q.answer]}. ${q.options[q.answer]}</strong>.<br>${q.feedback}`;
+  }
+}
+
+document.getElementById('submitBtn').addEventListener('click', () => {
+  const score = answered.reduce((sum, answer, index) => sum + (answer === questions[index].answer ? 1 : 0), 0);
+  const unanswered = answered.filter(answer => answer === null).length;
+  const percent = Math.round(score / questions.length * 100);
+
+  document.getElementById('score').innerHTML =
+    `${score} / ${questions.length} (${percent}%)` +
+    (unanswered ? `<div style="font-size:1rem;color:#64748b;margin-top:8px;">Αναπάντητες: ${unanswered}</div>` : '');
+
+  const result = document.getElementById('result');
+  result.style.display = 'block';
+  result.scrollIntoView({behavior:'smooth'});
+});
+</script>
+</body>
+</html>
